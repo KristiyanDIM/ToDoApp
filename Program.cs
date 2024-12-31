@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoApp.Data;
+using ToDoApp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +13,22 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Конфигуриране на заявките
-if (!app.Environment.IsDevelopment())
+// Извикване на инициализацията на категориите
+using (var scope = app.Services.CreateScope())
 {
-    app.UseExceptionHandler("/ToDo/Error");
-    app.UseHsts();
+    var context = scope.ServiceProvider.GetRequiredService<ToDoContext>();
+    ApplicationDbInitializer.Initialize(context); // Инициализация на категориите
+}
+
+// Конфигуриране на заявките
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage(); // Използване на developer exception page за разработка
+}
+else
+{
+    app.UseExceptionHandler("/ToDo/Error"); // По време на производство да се използва handler
+    app.UseHsts(); // Активиране на HSTS
 }
 
 app.UseHttpsRedirection();
@@ -29,7 +41,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=ToDo}/{action=Index}/{id?}"); // Променете от Home на ToDo
-
 
 // Стартиране на приложението
 app.Run();

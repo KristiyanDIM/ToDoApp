@@ -14,17 +14,45 @@
 
         <form asp-controller="ToDo" asp-action="Create" method="post">
             @Html.AntiForgeryToken()
+
             <div class="mb-3">
                 <label for="Title" class="form-label">Заглавие</label>
                 <input type="text" class="form-control" id="Title" name="Title" required>
                 @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
-
             </div>
+
             <div class="mb-3">
                 <label for="DueDate" class="form-label">До дата</label>
                 <input type="date" class="form-control" id="DueDate" name="DueDate" required>
-				@Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
             </div>
+
+            <!-- Падащо меню за категориите -->
+            <div class="mb-3">
+                <label for="categoryId" class="form-label">Категория</label>
+                <select id="categoryId" name="CategoryId" class="form-select" required>
+                    @if (ViewBag.Categories != null)
+                    {
+                        var categories = ViewBag.Categories as List<ToDoApp.Models.Category>;
+
+                        if (categories != null)
+                        {
+                            foreach (var category in categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        <option disabled>Няма категории</option>
+                    }
+                </select>
+            </div>
+
+
+
             <button type="submit" class="btn btn-primary">Създай</button>
         </form>
     </div>

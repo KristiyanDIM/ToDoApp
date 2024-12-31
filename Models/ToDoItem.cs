@@ -8,13 +8,11 @@ namespace ToDoApp.Models
     public class ToDoItem
     {
         public int Id { get; set; }
-
-        [Required(ErrorMessage = "Моля въведете заглавие.")]
-        public string Title { get; set; } = string.Empty;
+        public string Title { get; set; }
         public bool IsCompleted { get; set; }
-
-        [Required(ErrorMessage = "Моля въведете дата.")]
-        [DataType(DataType.Date)]
         public DateTime? DueDate { get; set; }
+        public int CategoryId { get; set; }
+        public required Category Category { get; set; }
+        public ICollection<UserTask> UserTasks { get; set; } // Add this property
     }
 }
