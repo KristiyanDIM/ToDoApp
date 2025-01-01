@@ -22,31 +22,6 @@ namespace ToDoApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Microsoft.Azure.Documents.User", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AltLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ETag")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResourceId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SelfLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("ToDoApp.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -85,28 +60,15 @@ namespace ToDoApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("TodoItems");
-                });
-
-            modelBuilder.Entity("ToDoApp.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
+                    b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("TodoItems");
                 });
 
             modelBuilder.Entity("ToDoApp.Models.UserTask", b =>
@@ -122,6 +84,23 @@ namespace ToDoApp.Migrations
                     b.HasIndex("ToDoItemId");
 
                     b.ToTable("UserTasks");
+                });
+
+            modelBuilder.Entity("ToDoApp.Models.Users", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("ToDoApp.Models.ToDoItem", b =>
@@ -143,7 +122,7 @@ namespace ToDoApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ToDoApp.Models.User", "User")
+                    b.HasOne("ToDoApp.Models.Users", "User")
                         .WithMany("UserTasks")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -164,7 +143,7 @@ namespace ToDoApp.Migrations
                     b.Navigation("UserTasks");
                 });
 
-            modelBuilder.Entity("ToDoApp.Models.User", b =>
+            modelBuilder.Entity("ToDoApp.Models.Users", b =>
                 {
                     b.Navigation("UserTasks");
                 });

@@ -16,6 +16,11 @@
             @Html.AntiForgeryToken()
 
             <div class="mb-3">
+                <label for="UserName" class="form-label">Име на потребителя</label>
+                <input type="text" class="form-control" id="UserName" name="UserName" required>
+            </div>
+
+            <div class="mb-3">
                 <label for="Title" class="form-label">Заглавие</label>
                 <input type="text" class="form-control" id="Title" name="Title" required>
                 @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
@@ -26,6 +31,7 @@
                 <input type="date" class="form-control" id="DueDate" name="DueDate" required>
                 @Html.ValidationMessageFor(m => m.DueDate, "", new { @class = "text-danger" })
             </div>
+
 
             <!-- Падащо меню за категориите -->
             <div class="mb-3">

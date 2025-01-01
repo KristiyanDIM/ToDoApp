@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ToDoApp.Data;
 using ToDoApp.Models;
 
+
 namespace ToDoApp.Controllers
 {
     public class ToDoController : Controller
@@ -21,8 +22,11 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var tasks = await _context.TodoItems.Include(t => t.Category).ToListAsync();
-
+            var tasks = await _context.TodoItems
+                                         .Include(t => t.Category)
+                                         .Include(t => t.UserTasks)
+                                         .ThenInclude(ut => ut.User)  // Включва потребителя за всяка задача
+                                         .ToListAsync();
 
             if (tasks == null)
             {
@@ -45,13 +49,27 @@ namespace ToDoApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ToDoItem model)
+        public async Task<IActionResult> Create(ToDoItem model, string userName)
         {
            
                 // Не трябва да задавате Id ръчно
-                _context.TodoItems.Add(model);  // Стойността на Id ще бъде автоматично зададена от базата
+                _context.TodoItems.Add(model);  
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
+
+            var user = new Users { Name = userName };
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            var userTask = new UserTask
+            {
+                UserId = user.Id,
+                ToDoItemId = model.Id
+            };
+
+            _context.UserTasks.Add(userTask);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
            
         }
 
@@ -64,8 +82,7 @@ namespace ToDoApp.Controllers
                 return BadRequest("ID не може да бъде празно.");
             }
 
-            // Намираме задачата с конкретен ID
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _context.TodoItems.Include(t => t.UserTasks).ThenInclude(ut => ut.User).FirstOrDefaultAsync(t => t.Id == id);
 
             // Ако не намерим задача с този ID, връщаме 404
             if (todoItem == null)
@@ -76,6 +93,7 @@ namespace ToDoApp.Controllers
             // Зареждаме категориите в ViewBag
             var categories = await _context.Categories.ToListAsync();
             ViewBag.Categories = new SelectList(categories, "Id", "Name", todoItem.CategoryId);
+            ViewBag.UserName = todoItem.UserTasks.FirstOrDefault()?.User?.Name ?? string.Empty;
 
             return View(todoItem);
 
@@ -84,32 +102,49 @@ namespace ToDoApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,DueDate,IsCompleted,CategoryId")] ToDoItem todoItem)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,DueDate,IsCompleted,CategoryId")] ToDoItem todoItem, string userName)
         {
             if (id != todoItem.Id)
             {
                 return NotFound();
             }
 
-                try
-                {
-                    _context.Update(todoItem);  // Не задавайте Id ръчно, то ще бъде актуализирано автоматично
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!_context.TodoItems.Any(e => e.Id == todoItem.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-        }
+            // Проверка за валидно потребителско име
+            if (string.IsNullOrEmpty(userName))
+            {
+                ModelState.AddModelError("UserName", "Името на потребителя е задължително.");
+                return View(todoItem);
+            }
 
+            try
+            {
+                todoItem.UserName = userName;  // Присвояване на името на потребителя
+                _context.Update(todoItem);
+                await _context.SaveChangesAsync();
+
+                // Намираме свързания потребител и актуализираме името
+                var userTask = await _context.UserTasks.Include(ut => ut.User).FirstOrDefaultAsync(ut => ut.ToDoItemId == todoItem.Id);
+
+                if (userTask != null)
+                {
+                    userTask.User.Name = userName; // Обновяваме името на потребителя
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.TodoItems.Any(e => e.Id == todoItem.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
 
 
         private bool TodoItemExists(int id)

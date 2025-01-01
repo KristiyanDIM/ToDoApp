@@ -13,7 +13,7 @@ namespace ToDoApp.Data
 
         public DbSet<ToDoItem> TodoItems { get; set; }
         public DbSet<Category> Categories { get; set; } // Нова таблица
-        public DbSet<Microsoft.Azure.Documents.User> Users { get; set; } // Нова таблица
+        public DbSet<Users> Users { get; set; } // Нова таблица
         public DbSet<UserTask> UserTasks { get; set; } // Свързваща таблица
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

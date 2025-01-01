@@ -17,6 +17,12 @@
 
             <input type="hidden" asp-for="Id" />
 
+
+            <div class="mb-3">
+                <label for="UserName" class="form-label">Име на потребителя</label>
+                <input type="text" class="form-control" id="UserName" name="UserName" required>
+            </div>
+
             <div class="mb-3">
                 <label asp-for="Title" class="form-label">Заглавие</label>
                 <input asp-for="Title" class="form-control" />

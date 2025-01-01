@@ -14,5 +14,8 @@ namespace ToDoApp.Models
         public int CategoryId { get; set; }
         public required Category Category { get; set; }
         public ICollection<UserTask> UserTasks { get; set; } // Add this property
+        public string UserName { get; set; } // Add this property
+
+
     }
 }

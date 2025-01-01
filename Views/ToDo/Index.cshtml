@@ -19,6 +19,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
+                    <th>Потребител</th>
                     <th>Заглавие</th>
                     <th>Завършена</th>
                     <th>До дата</th>
@@ -32,6 +33,7 @@
                     @foreach (var item in Model)
                     {
                         <tr>
+                            <td>@item.UserName</td>  <!-- Показване на името на потребителя -->
                             <td>@item.Title</td>
                             <td>
                                 @if (item.IsCompleted)
@@ -77,7 +79,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="5">Няма задачи</td>
+                        <td colspan="6">Няма задачи</td>
                     </tr>
                 }
             </tbody>
