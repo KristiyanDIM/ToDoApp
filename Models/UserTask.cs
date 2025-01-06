@@ -6,7 +6,6 @@ namespace ToDoApp.Models
     {
         public int UserId { get; set; }
         public Users User { get; set; }
-
         public int ToDoItemId { get; set; }
         public ToDoItem ToDoItem { get; set; }
     }

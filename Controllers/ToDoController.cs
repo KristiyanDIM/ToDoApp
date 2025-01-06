@@ -11,6 +11,8 @@ namespace ToDoApp.Controllers
 {
     public class ToDoController : Controller
     {
+
+        // Даваме възможност на контролера да работи с базата данни
         private readonly ToDoContext _context;
 
         public ToDoController(ToDoContext context)
@@ -19,21 +21,25 @@ namespace ToDoApp.Controllers
         }
 
         // Главната страница
+        // Зареждаме всички задачи от базата данни с включени категории и потребители.
+        // Ако няма задачи, създаваме празен списък.
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            //Зарежда всички задачи от базата данни, категориите и потребителите
             var tasks = await _context.TodoItems
                                          .Include(t => t.Category)
                                          .Include(t => t.UserTasks)
-                                         .ThenInclude(ut => ut.User)  // Включва потребителя за всяка задача
+                                         .ThenInclude(ut => ut.User) 
                                          .ToListAsync();
 
+            // Създава празен списък, ако няма задачи
             if (tasks == null)
             {
-                tasks = new List<ToDoItem>(); // Уверяваме се, че списъкът с задачи не е null
+                tasks = new List<ToDoItem>();
             }
 
-            return View(tasks); // Връщаме всички задачи на главната страница
+            return View(tasks);
         }
 
 
@@ -41,25 +47,28 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            // Зареждаме категориите в ViewBag
+            // Зареждаме категориите чрез ViewBag
             ViewBag.Categories = _context.Categories.ToList();
             return View();
 
         }
 
+        // Добавяме нова задача, създаваме потребител и свързваме задачата с потребителя.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ToDoItem model, string userName)
         {
            
-                // Не трябва да задавате Id ръчно
-                _context.TodoItems.Add(model);  
-                await _context.SaveChangesAsync();
+            // Не трябва да задавате Id ръчно
+            _context.TodoItems.Add(model);  
+            await _context.SaveChangesAsync();
 
+            //създаваме нов потребител
             var user = new Users { Name = userName };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            //свързваме задачата с потребителя
             var userTask = new UserTask
             {
                 UserId = user.Id,
@@ -69,7 +78,7 @@ namespace ToDoApp.Controllers
             _context.UserTasks.Add(userTask);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
+            return RedirectToAction(nameof(Index)); 
            
         }
 
@@ -77,12 +86,17 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
+            // Проверка за празно ID
             if (id == null)
             {
                 return BadRequest("ID не може да бъде празно.");
             }
 
-            var todoItem = await _context.TodoItems.Include(t => t.UserTasks).ThenInclude(ut => ut.User).FirstOrDefaultAsync(t => t.Id == id);
+            // зареждане на задачата с включени категории и потребители
+            var todoItem = await _context.TodoItems
+                                            .Include(t => t.UserTasks)
+                                            .ThenInclude(ut => ut.User)
+                                            .FirstOrDefaultAsync(t => t.Id == id);
 
             // Ако не намерим задача с този ID, връщаме 404
             if (todoItem == null)
@@ -96,14 +110,15 @@ namespace ToDoApp.Controllers
             ViewBag.UserName = todoItem.UserTasks.FirstOrDefault()?.User?.Name ?? string.Empty;
 
             return View(todoItem);
-
         }
 
 
+        // Актуализираме задачата и името на свързания потребител в базата данни.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,DueDate,IsCompleted,CategoryId")] ToDoItem todoItem, string userName)
         {
+            //Проверка за валидно ID
             if (id != todoItem.Id)
             {
                 return NotFound();
@@ -123,7 +138,9 @@ namespace ToDoApp.Controllers
                 await _context.SaveChangesAsync();
 
                 // Намираме свързания потребител и актуализираме името
-                var userTask = await _context.UserTasks.Include(ut => ut.User).FirstOrDefaultAsync(ut => ut.ToDoItemId == todoItem.Id);
+                var userTask = await _context.UserTasks
+                                            .Include(ut => ut.User)
+                                            .FirstOrDefaultAsync(ut => ut.ToDoItemId == todoItem.Id);
 
                 if (userTask != null)
                 {
@@ -131,7 +148,7 @@ namespace ToDoApp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                return RedirectToAction(nameof(Index));  // Пренасочване към главната страница
+                return RedirectToAction(nameof(Index));  
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -146,7 +163,6 @@ namespace ToDoApp.Controllers
             }
         }
 
-
         private bool TodoItemExists(int id)
         {
             return _context.TodoItems.Any(e => e.Id == id);
@@ -156,11 +172,13 @@ namespace ToDoApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(int? id)
         {
+            //проверка за празно ID
             if (id == null)
             {
                 return NotFound();
-            }   
+            }
 
+            //намира задачата и проверява дали съществува
             var todoItem = await _context.TodoItems.FindAsync(id);
             if (todoItem == null)
             {
@@ -170,21 +188,22 @@ namespace ToDoApp.Controllers
             return View(todoItem);
         }
 
-        // POST: Todo/Delete/5
+        
         [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _context.TodoItems.FindAsync(id); // Намираме задачата
             _context.TodoItems.Remove(todoItem); // Премахваме задачата от базата
             await _context.SaveChangesAsync(); // Записваме промените
-            return RedirectToAction(nameof(Index)); // Пренасочваме обратно към индекс
+            return RedirectToAction(nameof(Index)); 
         }
 
         // Отбелязване на задача като завършена
         [HttpPost]
         public async Task<IActionResult> Complete(int id)
         {
+            //намира задачата и проверява дали съществува
             var todoItem = await _context.TodoItems.FindAsync(id);
             if (todoItem == null)
             {
@@ -192,9 +211,9 @@ namespace ToDoApp.Controllers
             }
 
             todoItem.IsCompleted = true; // Променяме състоянието на задачата на завършена
-            _context.Update(todoItem);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index)); // След завършване, връщаме към индекс
+            _context.Update(todoItem); // Обновяваме задачата
+            await _context.SaveChangesAsync(); // Записваме промените
+            return RedirectToAction(nameof(Index)); 
         }
     }
 }

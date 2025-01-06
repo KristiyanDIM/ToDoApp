@@ -12,10 +12,10 @@
     <div class="container mt-5">
         <h1 class="mb-4">To Do List</h1>
 
-        <!-- Button to Navigate to Create New Task Page -->
+        <!-- Линк за навигация към страницата за създаване на нова задача -->
         <a href="@Url.Action("Create", "ToDo")" class="btn btn-primary mb-3">Добави нова задача</a>
 
-        <!-- Task Table -->
+        <!-- Таблица за визуализация на списъка със задачи -->
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -28,15 +28,15 @@
                 </tr>
             </thead>
             <tbody>
-                @if (Model != null && Model.Any())
+                @if (Model != null && Model.Any()) // Проверяваме дали има налични задачи в модела.
                 {
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.UserName</td>  <!-- Показване на името на потребителя -->
+                            <td>@item.UserName</td> 
                             <td>@item.Title</td>
                             <td>
-                                @if (item.IsCompleted)
+                                @if (item.IsCompleted)  // Проверяваме дали задачата е завършена и показваме съответния статус.
                                 {
                                     <span class="badge bg-success">Да</span>
                                 }
@@ -57,7 +57,7 @@
                                 }
                             </td>
                             <td>
-                                <!-- Complete Button -->
+                               <!-- Бутон за управление на задачата: Завършване. -->
                                 @if (!item.IsCompleted)
                                 {
                                     <form asp-action="Complete" asp-route-id="@item.Id" method="post" style="display:inline;">
@@ -65,10 +65,10 @@
                                     </form>
                                 }
 
-                                <!-- Edit Button -->
+                                <!-- Бутон за управление на задачата: Редактиране. -->
                                 <a href="@Url.Action("Edit", "ToDo", new { id = item.Id })" class="btn btn-warning btn-sm">Редактирай</a>
 
-                                <!-- Delete Button -->
+                                <!-- Бутон за управление на задачата: Изтриване. -->
                                 <form asp-action="Delete" asp-route-id="@item.Id" method="get" style="display:inline;">
                                     <button type="submit" class="btn btn-danger btn-sm">Изтрий</button>
                                 </form>
