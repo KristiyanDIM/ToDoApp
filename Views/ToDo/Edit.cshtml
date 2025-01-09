@@ -19,19 +19,19 @@
 
 
             <div class="mb-3">
-                <label for="UserName" class="form-label">Име на потребителя</label>
-                <input type="text" class="form-control" id="UserName" name="UserName" required>
+                <input type="text" class="form-control" id="UserName" name="UserName" value="@ViewBag.UserName" required>
+                <span class="text-danger">@ViewData.ModelState["UserName"]?.Errors.FirstOrDefault()?.ErrorMessage</span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Title" class="form-label">Заглавие</label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control" required />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="DueDate" class="form-label">Краен срок</label>
-                <input asp-for="DueDate" class="form-control" type="date" />
+                <input asp-for="DueDate" class="form-control" type="date" required />
                 <span asp-validation-for="DueDate" class="text-danger"></span>
             </div>
 

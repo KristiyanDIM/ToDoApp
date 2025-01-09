@@ -13,7 +13,7 @@ namespace ToDoApp.Models
         public DateTime? DueDate { get; set; }
         public int CategoryId { get; set; }
         public required Category Category { get; set; }
-        public ICollection<UserTask> UserTasks { get; set; } 
+        public ICollection<UserTask> UserTasks { get; set; }
         public string UserName { get; set; }
 
 
