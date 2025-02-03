@@ -12,10 +12,10 @@ public class ApplicationDbInitializer
 
         if (context.Categories.Any())
         {
-            return;   // Ако категориите вече съществуват, няма нужда да добавяме нови.
+            return; 
         }
 
-        // Добавяне на категории
+       
         var categories = new List<Category>
         {
             new Category { Name = "Лични задачи" },
@@ -31,6 +31,6 @@ public class ApplicationDbInitializer
         };
 
         context.Categories.AddRange(categories);  // Добавя всички категории в контекста
-        context.SaveChanges();  // Записва промените в базата
+        context.SaveChanges();  
     }
 }

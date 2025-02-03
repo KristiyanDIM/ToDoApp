@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Documents;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ToDoApp.Models;
 
 namespace ToDoApp.Data
@@ -12,8 +11,8 @@ namespace ToDoApp.Data
         }
 
         public DbSet<ToDoItem> TodoItems { get; set; }
-        public DbSet<Category> Categories { get; set; } // Нова таблица
-        public DbSet<Users> Users { get; set; } // Нова таблица
+        public DbSet<Category> Categories { get; set; } 
+        public DbSet<Users> Users { get; set; } 
         public DbSet<UserTask> UserTasks { get; set; } // Свързваща таблица
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,11 +23,13 @@ namespace ToDoApp.Data
             modelBuilder.Entity<UserTask>()
                 .HasKey(ut => new { ut.UserId, ut.ToDoItemId });
 
+            //Връзка между UserTask и Users
             modelBuilder.Entity<UserTask>()
                 .HasOne(ut => ut.User)
                 .WithMany(u => u.UserTasks)
                 .HasForeignKey(ut => ut.UserId);
 
+            //Връзка между UserTask и TodoItem
             modelBuilder.Entity<UserTask>()
                 .HasOne(ut => ut.ToDoItem)
                 .WithMany(t => t.UserTasks)
